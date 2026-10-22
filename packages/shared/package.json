@@ -1,0 +1,45 @@
+{
+  "name": "@collabspace/shared",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./canvas": "./src/canvas.ts",
+    "./events": "./src/events.ts",
+    "./permissions": "./src/permissions.ts",
+    "./templates": "./src/templates/index.ts",
+    "./editor": "./src/editor.ts"
+  },
+  "scripts": {
+    "build": "echo shared: consumed as source",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "echo shared: lint skipped"
+  },
+  "dependencies": {
+    "yjs": "^13.6.33",
+    "zod": "^4.1.0",
+    "@tiptap/core": "^3.0.0",
+    "@tiptap/starter-kit": "^3.0.0",
+    "@tiptap/extension-task-list": "^3.0.0",
+    "@tiptap/extension-task-item": "^3.0.0",
+    "@tiptap/extension-table": "^3.0.0",
+    "@tiptap/extension-image": "^3.0.0",
+    "@tiptap/extension-text-style": "^3.0.0",
+    "@tiptap/extension-highlight": "^3.0.0",
+    "@tiptap/extension-text-align": "^3.0.0",
+    "@tiptap/extension-code-block-lowlight": "^3.0.0",
+    "@tiptap/extension-mention": "^3.0.0",
+    "@tiptap/pm": "^3.0.0",
+    "lowlight": "^3.3.0",
+    "y-prosemirror": "^1.3.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.3",
+    "vitest": "^3.2.0",
+    "@types/node": "^24.0.0"
+  }
+}

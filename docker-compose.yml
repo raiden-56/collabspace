@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: collabspace-postgres
+    environment:
+      POSTGRES_USER: collabspace
+      POSTGRES_PASSWORD: collabspace
+      POSTGRES_DB: collabspace
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U collabspace"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    container_name: collabspace-redis
+    ports:
+      - "6380:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # S3-compatible object storage. The API creates the bucket on startup if it is missing.
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: collabspace-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: collabspace
+      MINIO_ROOT_PASSWORD: collabspace123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    profiles: ["storage"]
+
+  # Local SMTP sink with a web UI at http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: collabspace-mailpit
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    profiles: ["mail"]
+
+volumes:
+  pgdata:
+  miniodata:

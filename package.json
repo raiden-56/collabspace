@@ -1,0 +1,32 @@
+{
+  "name": "collabspace",
+  "private": true,
+  "version": "0.1.0",
+  "description": "CollabSpace — real-time collaboration studio (canvas, docs, tasks, chat, meetings, AI)",
+  "packageManager": "pnpm@10.18.0",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "concurrently -k -n api,sync,web -c blue,magenta,green \"pnpm --filter @collabspace/api dev\" \"pnpm --filter @collabspace/sync dev\" \"pnpm --filter @collabspace/web dev\"",
+    "build": "pnpm -r --filter ./packages/* build && pnpm -r --filter ./apps/* build",
+    "start": "concurrently -k -n api,sync,web \"pnpm --filter @collabspace/api start\" \"pnpm --filter @collabspace/sync start\" \"pnpm --filter @collabspace/web start\"",
+    "infra:up": "docker compose up -d",
+    "infra:down": "docker compose down",
+    "db:generate": "pnpm --filter @collabspace/db generate",
+    "db:migrate": "pnpm --filter @collabspace/db migrate:dev",
+    "db:deploy": "pnpm --filter @collabspace/db migrate:deploy",
+    "db:seed": "pnpm --filter @collabspace/db seed",
+    "db:reset": "pnpm --filter @collabspace/db reset",
+    "setup": "pnpm install && pnpm infra:up && pnpm db:generate && pnpm db:migrate && pnpm db:seed",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r --no-bail test",
+    "test:integration": "pnpm --filter @collabspace/api test:integration && pnpm --filter @collabspace/sync test:integration",
+    "e2e": "pnpm --filter @collabspace/e2e test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prettier": "^3.5.0",
+    "typescript": "~5.9.3"
+  }
+}

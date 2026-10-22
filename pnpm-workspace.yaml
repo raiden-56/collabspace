@@ -1,0 +1,14 @@
+packages:
+  - apps/*
+  - packages/*
+  - e2e
+onlyBuiltDependencies:
+  - argon2
+  - esbuild
+  - prisma
+  - '@prisma/client'
+  - '@prisma/engines'
+  - sharp
+  - canvas
+  - '@tailwindcss/oxide'
+  - unrs-resolver
