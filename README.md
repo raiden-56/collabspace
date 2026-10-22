@@ -37,7 +37,7 @@ Open http://localhost:3000. Register, create a workspace (optionally with demo c
 pnpm --filter @collabspace/shared test             # unit: permissions, dependencies, canvas serialization/templates (24 tests)
 pnpm --filter @collabspace/api test:integration    # auth, workspaces, invitations, tasks, versions, sharing, meetings+AI, search (15 tests)
 pnpm --filter @collabspace/sync test:integration   # two Yjs clients converge, unauthorized rejected, read-only share links, offline resync (4 tests)
-pnpm e2e                                           # Playwright: the 19-step workflow from the spec in two real browser sessions (8 tests)
+pnpm e2e                                           # Playwright: the 19-step workflow from the spec plus Kanban drag-and-drop and live chat, in two real browser sessions (10 tests)
 ```
 
 Integration tests need the Postgres container running (they use `DATABASE_URL` from `.env`). The Playwright suite needs the full stack running (`pnpm dev`) and a browser (`pnpm --filter @collabspace/e2e install-browsers`). Behind a TLS-intercepting proxy the browser download may need `NODE_TLS_REJECT_UNAUTHORIZED=0` for that one command.
