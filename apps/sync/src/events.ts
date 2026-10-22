@@ -176,7 +176,7 @@ export function disconnect(conn: EventConn): void {
 export async function startRedisRelay(): Promise<void> {
   const redis = getRedis();
   if (!redis) return;
-  const sub = redis.duplicate();
+  const sub = redis.duplicate({ lazyConnect: false, enableOfflineQueue: true, maxRetriesPerRequest: null });
   await sub.subscribe(REDIS_EVENTS_CHANNEL);
   sub.on("message", (_ch: string, msg: string) => {
     try {

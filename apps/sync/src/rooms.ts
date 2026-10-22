@@ -77,7 +77,7 @@ export class Room {
     persisted.destroy();
     const redis = getRedis();
     if (redis) {
-      const sub = redis.duplicate();
+      const sub = redis.duplicate({ lazyConnect: false, enableOfflineQueue: true, maxRetriesPerRequest: null });
       await sub.subscribe(this.redisChannel).catch((err) => logger.warn({ err }, "redis subscribe failed"));
       sub.on("messageBuffer", (_ch: Buffer, msg: Buffer) => {
         // Messages from other instances: [kind(1 byte)][payload]

@@ -29,11 +29,11 @@ const TOOLS: Array<{ tool: Tool; icon: React.ComponentType<{ className?: string 
 export function CanvasToolbar({ tool, setTool, readOnly }: { tool: Tool; setTool: (t: Tool) => void; readOnly: boolean }) {
   const visible = readOnly ? TOOLS.filter((t) => t.tool === "select" || t.tool === "hand") : TOOLS;
   return (
-    <div className="pointer-events-auto flex max-w-[calc(100vw-2rem)] items-center gap-0.5 overflow-x-auto rounded-xl border border-border p-1 shadow-md glass no-scrollbar" role="toolbar" aria-label="Canvas tools">
+    <div className="pointer-events-auto flex max-h-[calc(100%-2rem)] flex-col items-center gap-0.5 overflow-y-auto rounded-xl border border-border p-1 shadow-md glass no-scrollbar" role="toolbar" aria-label="Canvas tools" aria-orientation="vertical">
       {visible.map((t, i) => (
-        <span key={t.tool} className="flex items-center">
-          {(i === 2 || i === 10 || i === 16) && !readOnly ? <span className="mx-0.5 h-5 w-px bg-border" /> : null}
-          <Tooltip content={t.label} shortcut={t.key} side="top">
+        <span key={t.tool} className="flex flex-col items-center">
+          {(i === 2 || i === 10 || i === 16) && !readOnly ? <span className="my-0.5 h-px w-5 bg-border" /> : null}
+          <Tooltip content={t.label} shortcut={t.key} side="right">
             <button
               onClick={() => setTool(t.tool)}
               aria-label={t.label}

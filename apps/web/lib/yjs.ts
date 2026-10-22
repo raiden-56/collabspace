@@ -88,8 +88,16 @@ export function useCollab(type: "canvas" | "document", id: string | null | undef
     c.provider.on("sync", onSync);
     c.persistence?.whenSynced.then(() => setLocalReady(true)).catch(() => setLocalReady(true));
     if (!c.persistence) setLocalReady(true);
-    const onOffline = () => setStatus("offline");
-    const onOnline = () => setStatus("connecting");
+    // React to browser connectivity changes immediately instead of waiting for the dead-socket timeout.
+    // Edits made while disconnected stay in the Y.Doc (and IndexedDB) and are sent during the resync.
+    const onOffline = () => {
+      setStatus("offline");
+      c.provider.disconnect();
+    };
+    const onOnline = () => {
+      setStatus("connecting");
+      c.provider.connect();
+    };
     window.addEventListener("offline", onOffline);
     window.addEventListener("online", onOnline);
     return () => {

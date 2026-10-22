@@ -34,12 +34,13 @@ Open http://localhost:3000. Register, create a workspace (optionally with demo c
 ## Tests
 
 ```bash
-pnpm --filter @collabspace/shared test          # unit: permissions, dependencies, canvas serialization/templates (24 tests)
-pnpm --filter @collabspace/api test:integration # auth, workspaces, invitations, tasks, versions, sharing, meetings+AI, search (15 tests)
-pnpm --filter @collabspace/sync test:integration# two Yjs clients converge, unauthorized rejected, read-only share links, offline resync (4 tests)
+pnpm --filter @collabspace/shared test             # unit: permissions, dependencies, canvas serialization/templates (24 tests)
+pnpm --filter @collabspace/api test:integration    # auth, workspaces, invitations, tasks, versions, sharing, meetings+AI, search (15 tests)
+pnpm --filter @collabspace/sync test:integration   # two Yjs clients converge, unauthorized rejected, read-only share links, offline resync (4 tests)
+pnpm e2e                                           # Playwright: the 19-step workflow from the spec in two real browser sessions (8 tests)
 ```
 
-Integration tests need the Postgres container running (they use `DATABASE_URL` from `.env`).
+Integration tests need the Postgres container running (they use `DATABASE_URL` from `.env`). The Playwright suite needs the full stack running (`pnpm dev`) and a browser (`pnpm --filter @collabspace/e2e install-browsers`). Behind a TLS-intercepting proxy the browser download may need `NODE_TLS_REJECT_UNAUTHORIZED=0` for that one command.
 
 ## Architecture notes
 
@@ -51,6 +52,8 @@ Integration tests need the Postgres container running (they use `DATABASE_URL` f
 
 ## Status
 
-Implemented and verified by tests/smoke: database schema + migration, full REST API (84 documented endpoints), sync service, auth pages, marketing site, app shell (sidebar, top bar, command palette, notifications, shortcuts, share dialog), workspace overview, projects, canvases list, documents list, infinite canvas editor, collaborative document editor, tasks (list/board/timeline/My Tasks + detail drawer), calendar, meetings list, files, members, analytics, workspace settings + automation, inbox, search, templates, settings, admin pages.
+All layers are implemented and verified: schema + migration, REST API (84 documented endpoints), sync service, web app (marketing site, auth, onboarding, shell, workspace overview, projects, infinite canvas, collaborative documents, tasks with list/board/timeline/calendar, meetings with AI summaries and action-item review, team chat, files, members, analytics, settings and automation, inbox, search, templates, admin). `pnpm -r typecheck`, the unit/integration suites, `next build` and the Playwright suite all pass.
 
-Not yet written: `apps/web` team chat page (`[workspaceSlug]/chat`) and meeting workspace page (`meetings/[meetingId]`) — their APIs exist and are tested. The web app has not been type-checked or built yet; Playwright specs and deployment docs are outstanding.
+Seed a demo workspace with `pnpm db:seed` (logins printed by the script). See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment.
+
+Known limitations: audio recording/transcription and external calendar sync are not implemented (the UI says so); the AI assistant uses an offline mock provider unless `AI_PROVIDER=anthropic` is configured; lint reports React Compiler advisories as warnings.

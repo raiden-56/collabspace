@@ -23,10 +23,11 @@ export const useHeaderStore = create<HeaderState>()((set) => ({
 }));
 
 /** Pages call this to populate the top bar with contextual title / breadcrumbs / actions. */
-export function useHeader(state: Partial<Omit<HeaderState, "set" | "reset">>, deps: unknown[] = []) {
+export function useHeader(state: Partial<Omit<HeaderState, "set" | "reset">>, deps: unknown[] = [], enabled = true) {
   const set = useHeaderStore((s) => s.set);
   const reset = useHeaderStore((s) => s.reset);
   useEffect(() => {
+    if (!enabled) return;
     set(state);
     return () => reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps

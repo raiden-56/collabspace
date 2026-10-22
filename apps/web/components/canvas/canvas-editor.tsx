@@ -140,11 +140,11 @@ export function CanvasEditor({ canvasId, shareToken, readOnly: forcedReadOnly }:
   // Fit on first sync
   const fitted = useRef(false);
   useEffect(() => {
-    if (fitted.current || !(collab.synced || collab.localReady) || ops.objects.length === 0) return;
+    if (fitted.current || !collab.synced) return;
     fitted.current = true;
-    zoomToFit();
+    if (ops.objects.length > 0) zoomToFit();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collab.synced, collab.localReady, ops.objects.length]);
+  }, [collab.synced]);
 
   // Transformer binding
   useEffect(() => {
@@ -214,9 +214,9 @@ export function CanvasEditor({ canvasId, shareToken, readOnly: forcedReadOnly }:
     const h = extra.height ?? d.height ?? 80;
     const parent = frames.find((f) => at.x >= f.x && at.x <= f.x + f.width && at.y >= f.y && at.y <= f.y + f.height)?.id ?? null;
     const obj = ops.add({ type: type as CanvasObject["type"], ...d, ...extra, x: snapIf(at.x - (extra.x !== undefined ? 0 : w / 2)), y: snapIf(at.y - (extra.y !== undefined ? 0 : h / 2)), width: w, height: h, parentId: type === "frame" ? null : parent, ...(type === "sticky" ? { color: STICKY_COLORS[Math.floor(Math.random() * 4)] } : {}), ...(type === "frame" ? { title: `Section ${frames.length + 1}` } : {}) });
+    if (tool !== "freehand") store.setTool("select");
     store.setSelected([obj.id]);
     if (type === "sticky" || type === "text") store.setEditing(obj.id);
-    if (tool !== "freehand") store.setTool("select");
     return obj;
   };
 
@@ -665,14 +665,14 @@ export function CanvasEditor({ canvasId, shareToken, readOnly: forcedReadOnly }:
             {editingObj && !readOnly ? <TextEditOverlay obj={editingObj} viewport={viewport} onChange={(text) => ops.update(editingObj.id, editingObj.type === "frame" ? { title: text } : editingObj.type === "connector" ? { label: text } : { text })} onDone={() => store.setEditing(null)} lookupBounds={ops.lookupBounds} /> : null}
 
             {/* Floating UI */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-4 flex justify-center px-4">
+            <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center">
               <CanvasToolbar tool={tool} setTool={store.setTool} readOnly={readOnly} />
             </div>
             <div className="pointer-events-none absolute bottom-4 right-4 flex flex-col items-end gap-2">
               {store.showMinimap && size.width > 640 ? <Minimap objects={ops.objects} viewport={viewport} size={size} onNavigate={(c) => store.setViewport((v) => ({ ...v, x: size.width / 2 - c.x * v.scale, y: size.height / 2 - c.y * v.scale }))} /> : null}
               <CanvasZoomBar scale={viewport.scale} onZoomIn={() => zoomBy(1.2)} onZoomOut={() => zoomBy(1 / 1.2)} onFit={zoomToFit} onReset={() => store.setViewport((v) => zoomAt(v, { x: size.width / 2, y: size.height / 2 }, 1))} canUndo={ops.canUndo} canRedo={ops.canRedo} undo={ops.undo} redo={ops.redo} showGrid={showGrid} toggleGrid={store.toggleGrid} snap={snapToGrid} toggleSnap={store.toggleSnap} readOnly={readOnly} />
             </div>
-            <div className="pointer-events-none absolute left-4 top-4 flex flex-col gap-2">
+            <div className="pointer-events-none absolute left-20 top-4 flex flex-col gap-2">
               {store.connectorFrom ? <div className="pointer-events-auto rounded-lg border border-border px-3 py-1.5 text-xs shadow glass">Click a target object to connect · Esc to cancel</div> : null}
               {tool === "comment" ? <div className="pointer-events-auto rounded-lg border border-border px-3 py-1.5 text-xs shadow glass">Click anywhere to leave a comment pin</div> : null}
               {readOnly ? <div className="pointer-events-auto rounded-lg border border-border px-3 py-1.5 text-xs shadow glass">View-only — you can pan, zoom{canComment ? " and comment" : ""}</div> : null}
@@ -812,10 +812,14 @@ function TextEditOverlay({ obj, viewport, onChange, onDone, lookupBounds }: { ob
   }
   const p = canvasToScreen(isFrame ? { x: b.x, y: b.y - 30 } : b, viewport);
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.focus();
-    el.setSelectionRange(el.value.length, el.value.length);
+    // Defer focus past the browser default mousedown focus change (which would otherwise blur us immediately).
+    const t = setTimeout(() => {
+      const el = ref.current;
+      if (!el) return;
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
   const style: React.CSSProperties = {
     position: "absolute",

@@ -56,7 +56,10 @@ class RealtimeClient {
     this.backoff = 500;
     this.connect();
   };
-  private onOffline = () => this.setStatus("offline");
+  private onOffline = () => {
+    this.setStatus("offline");
+    this.ws?.close();
+  };
 
   private connect() {
     if (!this.enabled || typeof window === "undefined") return;

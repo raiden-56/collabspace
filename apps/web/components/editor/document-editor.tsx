@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 
 type Panel = "comments" | "versions" | "outline" | null;
 
-export function DocumentEditor({ documentId, shareToken, readOnly: forcedReadOnly }: { documentId: string; shareToken?: string | null; readOnly?: boolean }) {
+export function DocumentEditor({ documentId, shareToken, readOnly: forcedReadOnly, embedded }: { documentId: string; shareToken?: string | null; readOnly?: boolean; embedded?: boolean }) {
   const { user, workspace, workspaceSlug } = useApp();
   const router = useRouter();
   const qc = useQueryClient();
@@ -75,7 +75,8 @@ export function DocumentEditor({ documentId, shareToken, readOnly: forcedReadOnl
             SlashCommand,
             CommentMark.configure({ onClick: (id) => { setPanel("comments"); setActiveThread(id); } }),
           ]
-        : [],
+        : // Schema-only placeholder while the collaborative document is still connecting.
+          baseDocumentExtensions(),
       editorProps: {
         attributes: { class: "tiptap", "aria-label": "Document body", spellcheck: "true" },
         handleClick: (_view, _pos, event) => {
@@ -180,7 +181,7 @@ export function DocumentEditor({ documentId, shareToken, readOnly: forcedReadOnl
 
   // Highlight active thread mark
   useEffect(() => {
-    if (!editor) return;
+    if (!editor || editor.isDestroyed || !editor.isInitialized) return;
     editor.view.dom.querySelectorAll(".comment-mark.active").forEach((el) => el.classList.remove("active"));
     if (activeThread) editor.view.dom.querySelectorAll(`.comment-mark[data-thread-id="${CSS.escape(activeThread)}"]`).forEach((el) => el.classList.add("active"));
   }, [editor, activeThread, threads.data]);
@@ -240,19 +241,23 @@ export function DocumentEditor({ documentId, shareToken, readOnly: forcedReadOnl
       ),
     },
     [document.data?.title, document.data?.project?.id, access, collab.status, collab.synced, panel, readingMode],
+    !embedded,
   );
 
   if (document.isError) return <div className="flex h-full items-center justify-center text-text-secondary">You don&apos;t have access to this document.</div>;
   if (!document.data || !editor) return <div className="flex h-full items-center justify-center"><Spinner /></div>;
 
   const editorBody = (
-    <div className={cn("mx-auto w-full px-6 pb-32 pt-6", readingMode ? "max-w-2xl" : "max-w-3xl")}>
-      {document.data.meeting ? (
+    <div className={cn("mx-auto w-full px-6 pt-6", embedded ? "pb-10" : "pb-32", readingMode ? "max-w-2xl" : "max-w-3xl")}>
+      {document.data.meeting && !embedded ? (
         <button onClick={() => router.push(`/app/${workspaceSlug}/meetings/${document.data!.meeting!.id}`)} className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-secondary-soft px-2.5 py-1 text-xs font-medium text-secondary">
           Notes for meeting “{document.data.meeting.title}” →
         </button>
       ) : null}
-      <input
+      {embedded ? (
+        <div className="mb-2 flex items-center justify-between text-xs text-text-muted"><span>Collaborative notes</span><div className="flex items-center gap-2"><DocSyncStatus status={collab.status} synced={collab.synced} /><button className="hover:text-text" onClick={() => router.push(`/app/${workspaceSlug}/docs/${documentId}`)}>Open full document →</button></div></div>
+      ) : null}
+      {!embedded ? <input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         onBlur={() => title.trim() && title !== document.data?.title && saveTitle.mutate(title.trim())}
@@ -261,7 +266,7 @@ export function DocumentEditor({ documentId, shareToken, readOnly: forcedReadOnl
         aria-label="Document title"
         placeholder="Untitled"
         className={cn("mb-4 w-full bg-transparent text-4xl font-bold tracking-tight outline-none placeholder:text-text-muted", readingMode && "text-3xl")}
-      />
+      /> : null}
       {others.length ? (
         <div className="mb-3 flex items-center gap-1.5 text-xs text-text-muted">
           <span className="flex -space-x-1">
@@ -284,7 +289,7 @@ export function DocumentEditor({ documentId, shareToken, readOnly: forcedReadOnl
   return (
     <div className={cn("flex h-full", focusMode && "fixed inset-0 z-50 bg-bg")}>
       <div className="relative flex min-w-0 flex-1 flex-col">
-        {!readOnly && !readingMode ? (
+        {!readOnly && !readingMode && !embedded ? (
           <div className="sticky top-0 z-10 flex justify-center px-4 pt-3">
             <EditorToolbar editor={editor} readOnly={readOnly} onComment={canComment ? () => void commentOnSelection() : undefined} onImage={() => fileInputRef.current?.click()} />
           </div>

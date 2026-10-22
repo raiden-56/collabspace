@@ -259,8 +259,10 @@ workspacesRouter.get(
       prisma.activity.findMany({ where: { workspaceId: ws.id }, orderBy: { createdAt: "desc" }, take: 12, include: { actor: { select: { id: true, name: true, avatarUrl: true, color: true } } } }),
     ]);
     const now = new Date();
+    const doneByProject = await prisma.task.groupBy({ by: ["projectId"], where: { projectId: { in: projects.map((p) => p.id) }, deletedAt: null, completedAt: { not: null } }, _count: { _all: true } });
+    const doneMap = new Map(doneByProject.map((d) => [d.projectId, d._count._all]));
     ok(res, {
-      projects: projects.map((p) => ({ ...p, taskCount: p._count.tasks })),
+      projects: projects.map((p) => ({ ...p, taskCount: p._count.tasks, completedTasks: doneMap.get(p.id) ?? 0 })),
       myTasks: myTasks.map((t) => ({ ...t, overdue: isOverdue(t, now) })),
       upcomingMeetings,
       recentDocuments: recentDocs,

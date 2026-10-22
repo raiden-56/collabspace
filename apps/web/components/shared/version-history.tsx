@@ -119,7 +119,7 @@ export function VersionHistoryPanel({ type, id, canEdit, onClose, onPreview, pre
         title="Restore this version?"
         description="The current state is saved as a recovery point first, so nothing is lost. Everyone connected will see the restored content immediately."
         confirmLabel="Restore"
-        onConfirm={() => restoring && restore.mutate(restoring.id)}
+        onConfirm={() => { if (restoring) restore.mutate(restoring.id); }}
         loading={restore.isPending}
       />
       {compare ? <CompareDialog type={type} id={id} a={compare[0]} b={compare[1]} onClose={() => setCompare(null)} /> : null}
@@ -163,7 +163,7 @@ function CompareDialog({ type, id, a, b, onClose }: { type: "canvas" | "document
           <div className="grid gap-4 sm:grid-cols-2">
             <DiffList title={`Added in newer (${diff.added.length})`} items={diff.added} tone="success" />
             <DiffList title={`Removed since older (${diff.removed.length})`} items={diff.removed} tone="error" />
-            {"changed" in diff ? <DiffList title={`Changed (${diff.changed.length})`} items={diff.changed} tone="warning" /> : null}
+            {"changed" in diff && diff.changed ? <DiffList title={`Changed (${diff.changed.length})`} items={diff.changed} tone="warning" /> : null}
           </div>
         )}
       </DialogContent>

@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, Spinner } from "@/components/ui/skeleton";
 import { Eye, LogIn, MessageSquare, PenLine } from "lucide-react";
+import { AppProvider } from "@/components/app-shell/workspace-context";
+import { CreateDialogsProvider } from "@/components/app-shell/create-dialogs";
 
 const CanvasEditor = dynamic(() => import("@/components/canvas/canvas-editor").then((m) => m.CanvasEditor), { ssr: false, loading: () => <div className="flex h-full items-center justify-center"><Spinner /></div> });
 const DocumentEditor = dynamic(() => import("@/components/editor/document-editor").then((m) => m.DocumentEditor), { ssr: false, loading: () => <div className="flex h-full items-center justify-center"><Spinner /></div> });
@@ -29,6 +31,16 @@ interface Shared {
 
 export default function SharePage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = use(params);
+  return (
+    <AppProvider>
+      <CreateDialogsProvider>
+        <ShareContent token={token} />
+      </CreateDialogsProvider>
+    </AppProvider>
+  );
+}
+
+function ShareContent({ token }: { token: string }) {
   const router = useRouter();
   const me = useMe();
   const shared = useQuery<Shared>({ queryKey: ["shared", token], queryFn: () => get(`/shared/${token}`, undefined, { silent401: true }), retry: false });

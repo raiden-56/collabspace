@@ -77,6 +77,9 @@ importers:
       swagger-ui-express:
         specifier: ^5.0.1
         version: 5.0.1(express@5.3.0)
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.15
       ws:
         specifier: ^8.18.0
         version: 8.22.0
@@ -120,9 +123,6 @@ importers:
       supertest:
         specifier: ^7.1.0
         version: 7.3.1
-      tsx:
-        specifier: ^4.20.0
-        version: 4.23.15
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -153,6 +153,9 @@ importers:
       pino-pretty:
         specifier: ^13.0.0
         version: 13.2.0
+      tsx:
+        specifier: ^4.20.0
+        version: 4.23.15
       ws:
         specifier: ^8.18.0
         version: 8.22.0
@@ -172,9 +175,6 @@ importers:
       '@types/ws':
         specifier: ^8.18.1
         version: 8.18.2
-      tsx:
-        specifier: ^4.20.0
-        version: 4.23.15
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -358,6 +358,9 @@ importers:
       tailwind-merge:
         specifier: ^3.3.0
         version: 3.7.0
+      tippy.js:
+        specifier: ^6.3.7
+        version: 6.3.7
       y-indexeddb:
         specifier: ^9.0.12
         version: 9.0.12(yjs@13.6.33)
@@ -1364,6 +1367,9 @@ packages:
     resolution: {integrity: sha512-IaYGml/nSOiZWROfPtuIL7neuu9qDOZ3TNvNljUIrhDMxiGTgPjzj/g9p9RxpS2tSepPDRY+UwAaEeiKtUvIAg==}
     engines: {node: '>=20'}
     hasBin: true
+
+  '@popperjs/core@2.11.8':
+    resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
 
   '@prisma/client@6.19.3':
     resolution: {integrity: sha512-mKq3jQFhjvko5LTJFHGilsuQs+W+T3Gm451NzuTDGQxwCzwXHYnIu2zGkRoW+Exq3Rob7yp2MfzSrdIiZVhrBg==}
@@ -4838,6 +4844,9 @@ packages:
     resolution: {integrity: sha512-u8KszXvGfU68hVcZpRHKG28T0krMuv2G5nDhiHaMLen/gIuFEgIJhaJuO69qjnXg5paSrbPMFfx3brNuN8eVSg==}
     engines: {node: '>=14.0.0'}
 
+  tippy.js@6.3.7:
+    resolution: {integrity: sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==}
+
   tldts-core@6.1.86:
     resolution: {integrity: sha512-Je6p7pkk+KMzMv2XXKmAE3McmolOQFdxkKw0R8EYNr7sELW46JqnNeTX8ybPiQgvg1ymCoF8LXs5fzFaZvJPTA==}
 
@@ -5970,6 +5979,8 @@ snapshots:
   '@playwright/test@1.64.1':
     dependencies:
       playwright: 1.64.1
+
+  '@popperjs/core@2.11.8': {}
 
   '@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)':
     optionalDependencies:
@@ -9770,6 +9781,10 @@ snapshots:
   tinyrainbow@2.0.0: {}
 
   tinyspy@4.0.6: {}
+
+  tippy.js@6.3.7:
+    dependencies:
+      '@popperjs/core': 2.11.8
 
   tldts-core@6.1.86: {}
 

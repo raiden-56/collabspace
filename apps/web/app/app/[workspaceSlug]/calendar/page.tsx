@@ -159,7 +159,7 @@ export default function CalendarPage() {
         title="Schedule conflict"
         description={conflict ? `This overlaps with ${conflict.conflicts.map((c) => `“${c.title}”`).join(", ")} for some participants. Move it anyway?` : ""}
         confirmLabel="Move anyway"
-        onConfirm={() => conflict && reschedule.mutate({ item: conflict.item, start: conflict.start, confirm: true })}
+        onConfirm={() => { if (conflict) reschedule.mutate({ item: conflict.item, start: conflict.start, confirm: true }); }}
       />
     </div>
   );

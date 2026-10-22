@@ -21,9 +21,10 @@ import { addMember, workspaceSummaryForUser } from "../services/workspaces.js";
 
 export const authRouter = Router();
 
-const loginLimiter = rateLimit({ name: "login", windowMs: 15 * 60_000, max: 20 });
-const registerLimiter = rateLimit({ name: "register", windowMs: 60 * 60_000, max: 20 });
-const forgotLimiter = rateLimit({ name: "forgot", windowMs: 60 * 60_000, max: 10 });
+// Strict in production; lenient locally so test suites and demos are not throttled.
+const loginLimiter = rateLimit({ name: "login", windowMs: 15 * 60_000, max: config.isProd ? 20 : 500 });
+const registerLimiter = rateLimit({ name: "register", windowMs: 60 * 60_000, max: config.isProd ? 20 : 500 });
+const forgotLimiter = rateLimit({ name: "forgot", windowMs: 60 * 60_000, max: config.isProd ? 10 : 200 });
 
 async function issueToken(userId: string, purpose: "EMAIL_VERIFY" | "PASSWORD_RESET", ttlMs: number): Promise<string> {
   const token = randomToken(32);

@@ -97,10 +97,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 
+const FALLBACK: AppContextValue = { me: undefined, user: undefined, workspace: undefined, workspaceSlug: undefined, isLoading: false, canManage: false, isGuest: true, refetchMe: () => {} };
+
+/** Inside the authenticated shell this returns live context; elsewhere (public share pages) a read-only fallback. */
 export function useApp(): AppContextValue {
-  const ctx = useContext(AppContext);
-  if (!ctx) throw new Error("useApp must be used within AppProvider");
-  return ctx;
+  return useContext(AppContext) ?? FALLBACK;
 }
 
 /** Current workspace (throws if used outside a workspace route). */

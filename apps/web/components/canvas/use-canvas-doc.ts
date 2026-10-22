@@ -176,15 +176,15 @@ export function useCanvasDoc(doc: Y.Doc | null | undefined, origin: string, read
     }, undefined);
   const setLocked: CanvasOps["setLocked"] = (ids, locked) => guard(() => doc!.transact(() => ids.forEach((id) => yUpdateObject(doc!, id, { locked })), localOrigin), undefined);
   const align: CanvasOps["align"] = (ids, mode) => {
-    const objs = ids.map((id) => byId.get(id)).filter((o): o is CanvasObject => Boolean(o) && !o.locked);
+    const objs = ids.map((id) => byId.get(id)).filter((o): o is CanvasObject => Boolean(o && !o.locked));
     updateMany(alignObjects(objs, mode).map((r) => ({ id: r.id, patch: { x: r.x, y: r.y } })));
   };
   const distribute: CanvasOps["distribute"] = (ids, axis) => {
-    const objs = ids.map((id) => byId.get(id)).filter((o): o is CanvasObject => Boolean(o) && !o.locked);
+    const objs = ids.map((id) => byId.get(id)).filter((o): o is CanvasObject => Boolean(o && !o.locked));
     updateMany(distributeObjects(objs, axis).map((r) => ({ id: r.id, patch: { x: r.x, y: r.y } })));
   };
   const arrange: CanvasOps["arrange"] = (ids) => {
-    const objs = ids.map((id) => byId.get(id)).filter((o): o is CanvasObject => Boolean(o) && !o.locked && o.type !== "connector");
+    const objs = ids.map((id) => byId.get(id)).filter((o): o is CanvasObject => Boolean(o && !o.locked && o.type !== "connector"));
     const b = unionBounds(objs.map((o) => objectBounds(o)));
     if (!b) return;
     updateMany(autoArrange(objs, { x: b.x, y: b.y }).map((r) => ({ id: r.id, patch: { x: r.x, y: r.y } })));

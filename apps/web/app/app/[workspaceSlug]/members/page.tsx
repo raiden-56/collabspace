@@ -150,7 +150,7 @@ export default function MembersPage() {
         </Card>
       ) : null}
 
-      <ConfirmDialog open={Boolean(removing)} onOpenChange={(o) => !o && setRemoving(null)} title={removing?.id === user?.id ? "Leave this workspace?" : `Remove ${removing?.name}?`} description="They will lose access to all projects, documents and conversations in this workspace." confirmLabel={removing?.id === user?.id ? "Leave" : "Remove"} destructive onConfirm={() => removing && remove.mutate(removing.id)} />
+      <ConfirmDialog open={Boolean(removing)} onOpenChange={(o) => !o && setRemoving(null)} title={removing?.id === user?.id ? "Leave this workspace?" : `Remove ${removing?.name}?`} description="They will lose access to all projects, documents and conversations in this workspace." confirmLabel={removing?.id === user?.id ? "Leave" : "Remove"} destructive onConfirm={() => { if (removing) remove.mutate(removing.id); }} />
     </div>
   );
 }

@@ -12,7 +12,7 @@ const HIGHLIGHTS = ["#FFF3A3", "#C7E9FF", "#D9F7E8", "#F9D5E5", "#E8E0FF", "#FFE
 export function EditorToolbar({ editor, onComment, onImage, readOnly }: { editor: Editor; onComment?: () => void; onImage: () => void; readOnly: boolean }) {
   const state = useEditorState({
     editor,
-    selector: ({ editor: e }) => ({
+    selector: ({ editor: e }) => e === null || e.isDestroyed ? null : ({
       bold: e.isActive("bold"),
       italic: e.isActive("italic"),
       underline: e.isActive("underline"),
@@ -31,8 +31,8 @@ export function EditorToolbar({ editor, onComment, onImage, readOnly }: { editor
       center: e.isActive({ textAlign: "center" }),
       right: e.isActive({ textAlign: "right" }),
       hasSelection: !e.state.selection.empty,
-      canUndo: e.can().undo(),
-      canRedo: e.can().redo(),
+      canUndo: typeof e.commands.undo === "function" ? e.can().undo() : false,
+      canRedo: typeof e.commands.redo === "function" ? e.can().redo() : false,
     }),
   });
   if (readOnly) return null;
