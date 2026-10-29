@@ -1,0 +1,53 @@
+# Publishes a static export of the web app to GitHub Pages. The API and sync servers
+# are not hosted here, so only the public pages render; signing in and the
+# workspace screens need the backend.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Static export cannot include the proxy route guard or routes whose
+      # params are only known at runtime (workspaces, invites, share links).
+      - name: Remove server-only routes
+        working-directory: apps/web
+        run: rm -rf proxy.ts "app/app/[workspaceSlug]" "app/invite/[token]" "app/share/[token]"
+      - name: Build
+        working-directory: apps/web
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}
+        run: pnpm exec next build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/web/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
