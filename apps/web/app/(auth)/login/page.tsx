@@ -11,6 +11,8 @@ import { post, errorMessage } from "@/lib/api";
 import { AuthCard } from "@/components/auth/auth-card";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
+import { ContinueAsGuest } from "@/components/guest/guest-mode";
+import { endGuestSession } from "@/lib/guest/session";
 
 const schema = z.object({ email: z.string().email("Enter a valid email"), password: z.string().min(1, "Enter your password") });
 type Form = z.infer<typeof schema>;
@@ -25,6 +27,8 @@ function LoginForm() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setError(null);
+    // A real sign-in replaces any guest session in this tab.
+    endGuestSession();
     try {
       await post("/auth/login", values, { silent401: true });
       qc.clear();
@@ -69,6 +73,7 @@ function LoginForm() {
           </Link>
         </div>
       </form>
+      <ContinueAsGuest next={next} />
     </AuthCard>
   );
 }

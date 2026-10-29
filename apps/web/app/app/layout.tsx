@@ -13,6 +13,7 @@ import { useUiStore } from "@/lib/stores/ui-store";
 import { useMediaQuery } from "@/lib/hooks/use-debounce";
 import { Spinner } from "@/components/ui/skeleton";
 import { Dialog, SheetContent } from "@/components/ui/overlays";
+import { GUEST_MODE_ENABLED } from "@/lib/guest/session";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -40,6 +41,12 @@ function Shell({ children }: { children: React.ReactNode }) {
   }, [me, isOnboarding, router]);
 
   useEffect(() => setMobileNav(false), [pathname]);
+
+  // Builds with guest mode may have no backend (static export) to answer with a 401, so send
+  // visitors without a session to the login page, where they can continue as a guest.
+  useEffect(() => {
+    if (GUEST_MODE_ENABLED && !isLoading && !me) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+  }, [isLoading, me, pathname, router]);
 
   if (isLoading && !me) {
     return (

@@ -10,6 +10,8 @@ import { usePresence } from "@/lib/realtime";
 import { useToggleFavorite } from "@/lib/queries";
 import { useApp } from "./workspace-context";
 import { ConnectionStatus } from "./connection-status";
+import { GuestModeChip } from "@/components/guest/guest-mode";
+import { useGuestSession } from "@/lib/guest/session";
 import { NotificationsPopover } from "./notifications-popover";
 import { UserMenu } from "./user-menu";
 import { ShareDialog } from "./share-dialog";
@@ -28,6 +30,7 @@ export function Topbar({ onMenu }: { onMenu?: () => void }) {
   const [shareOpen, setShareOpen] = useState(false);
   const presence = usePresence(resource ? `resource:${resource.type.toLowerCase()}:${resource.id}` : null);
   const fav = useToggleFavorite();
+  const guestMode = useGuestSession();
   useShortcut("mod+j", () => setAssistantOpen(!assistantOpen));
 
   const canShare = resource && (resource.access === "OWNER" || resource.access === "EDITOR") && ["CANVAS", "DOCUMENT", "PROJECT", "MEETING"].includes(resource.type);
@@ -93,7 +96,7 @@ export function Topbar({ onMenu }: { onMenu?: () => void }) {
             </Button>
           </Tooltip>
         ) : null}
-        <ConnectionStatus />
+        {guestMode ? <GuestModeChip /> : <ConnectionStatus />}
         <NotificationsPopover />
         <ThemeToggle compact />
         <UserMenu />

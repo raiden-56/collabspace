@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { ServerEvent, ClientEvent } from "@collabspace/shared";
+import { GUEST_MODE_ENABLED, isGuestSession } from "./guest/session";
 
 /**
  * Application-level realtime client (JSON events over one WebSocket), separate from Yjs rooms.
@@ -33,6 +34,8 @@ class RealtimeClient {
 
   enable() {
     if (this.enabled) return;
+    // Guest mode has no realtime server to connect to.
+    if (GUEST_MODE_ENABLED && isGuestSession()) return;
     this.enabled = true;
     if (typeof window !== "undefined") {
       window.addEventListener("online", this.onOnline);

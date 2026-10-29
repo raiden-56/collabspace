@@ -5,6 +5,7 @@ import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { IndexeddbPersistence } from "y-indexeddb";
 import type { Awareness } from "y-protocols/awareness";
+import { GUEST_MODE_ENABLED, isGuestSession } from "./guest/session";
 
 /**
  * Collaborative document connection = Yjs doc + authenticated WebSocket provider + IndexedDB cache.
@@ -76,6 +77,24 @@ export function useCollab(type: "canvas" | "document", id: string | null | undef
 
   useEffect(() => {
     if (!id || !enabled) return;
+    if (GUEST_MODE_ENABLED && isGuestSession()) {
+      // Guest mode: local document seeded from sample data, no sync server.
+      let c: CollabConnection | null = null;
+      let cancelled = false;
+      void import("./guest/collab").then((m) => {
+        if (cancelled) return;
+        c = m.createGuestCollabConnection(type, id, opts.user);
+        setConn(c);
+        setStatus("connected");
+        setSynced(true);
+        setLocalReady(true);
+      });
+      return () => {
+        cancelled = true;
+        c?.destroy();
+        setConn(null);
+      };
+    }
     const c = createCollabConnection(type, id, { shareToken: opts.shareToken, user: opts.user });
     setConn(c);
     setSynced(false);

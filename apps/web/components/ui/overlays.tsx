@@ -145,8 +145,15 @@ export function DropdownMenuSubContent({ className, ...props }: React.ComponentP
 export function DropdownMenuItem({ className, destructive, shortcut, children, ...props }: React.ComponentPropsWithoutRef<typeof DropdownPrimitive.Item> & { destructive?: boolean; shortcut?: string }) {
   return (
     <DropdownPrimitive.Item className={cn(menuItemClass, destructive && "text-error data-[highlighted]:bg-error-soft [&_svg]:text-error", className)} {...props}>
-      {children}
-      {shortcut ? <span className="ml-auto pl-4 text-[11px] tracking-wide text-text-muted">{shortcut}</span> : null}
+      {/* With `asChild` the Slot needs exactly one child, so don't add an empty shortcut sibling. */}
+      {shortcut ? (
+        <>
+          {children}
+          <span className="ml-auto pl-4 text-[11px] tracking-wide text-text-muted">{shortcut}</span>
+        </>
+      ) : (
+        children
+      )}
     </DropdownPrimitive.Item>
   );
 }

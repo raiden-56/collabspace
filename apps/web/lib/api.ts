@@ -2,6 +2,7 @@
  * Typed fetch wrapper for the REST API. Same-origin (/api/v1 is proxied by Next.js), cookie auth,
  * consistent error shape, 401 → redirect to login.
  */
+import { GUEST_MODE_ENABLED, isGuestSession } from "./guest/session";
 
 export class ApiError extends Error {
   constructor(
@@ -30,6 +31,13 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
 
 export async function api<T = unknown>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { body, query, silent401, headers, ...rest } = opts;
+  if (GUEST_MODE_ENABLED && isGuestSession()) {
+    // Guest mode (static demo): answered in the browser from sample data, no network.
+    const { handleGuestRequest } = await import("./guest/mock-api");
+    const q: Record<string, string> = {};
+    for (const [k, v] of Object.entries(query ?? {})) if (v !== undefined && v !== null && v !== "") q[k] = String(v);
+    return handleGuestRequest<T>({ method: rest.method ?? "GET", path, query: q, body });
+  }
   let url = `${BASE}${path}`;
   if (query) {
     const qs = new URLSearchParams();
@@ -82,6 +90,15 @@ export function errorMessage(err: unknown, fallback = "Something went wrong"): s
 
 /** Upload a file with progress via XHR (fetch has no upload progress). */
 export function uploadFile(file: File, fields: Record<string, string | undefined>, onProgress?: (pct: number) => void): Promise<FileAssetDto> & { abort: () => void } {
+  if (GUEST_MODE_ENABLED && isGuestSession()) {
+    // Guest mode: record the file's metadata locally; nothing is uploaded.
+    const promise = import("./guest/mock-api").then((m) => {
+      onProgress?.(100);
+      return m.guestUpload(file, fields);
+    }) as Promise<FileAssetDto> & { abort: () => void };
+    promise.abort = () => {};
+    return promise;
+  }
   const xhr = new XMLHttpRequest();
   const promise = new Promise<FileAssetDto>((resolve, reject) => {
     const form = new FormData();

@@ -1,6 +1,7 @@
 # Publishes a static export of the web app to GitHub Pages. The API and sync servers
-# are not hosted here, so only the public pages render; signing in and the
-# workspace screens need the backend.
+# are not hosted here, so real sign-in doesn't work; instead the build enables guest
+# mode, which lets visitors explore a demo workspace whose API calls are answered in
+# the browser from sample data (apps/web/lib/guest).
 name: Deploy to GitHub Pages
 
 on:
@@ -28,15 +29,18 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Static export cannot include the proxy route guard or routes whose
-      # params are only known at runtime (workspaces, invites, share links).
+      # Static export cannot include the proxy route guard or routes whose params
+      # are only known at runtime (invite and share tokens). The workspace routes
+      # stay: their layouts list the guest workspace and its sample IDs in
+      # generateStaticParams when BASE_PATH is set.
       - name: Remove server-only routes
         working-directory: apps/web
-        run: rm -rf proxy.ts "app/app/[workspaceSlug]" "app/invite/[token]" "app/share/[token]"
+        run: rm -rf proxy.ts "app/invite/[token]" "app/share/[token]"
       - name: Build
         working-directory: apps/web
         env:
           BASE_PATH: /${{ github.event.repository.name }}
+          NEXT_PUBLIC_GUEST_MODE: 'true'
         run: pnpm exec next build
       - uses: actions/upload-pages-artifact@v3
         with:

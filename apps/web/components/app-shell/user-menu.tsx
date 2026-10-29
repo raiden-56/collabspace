@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LogOut, Settings, Shield, User, Keyboard, LayoutGrid } from "lucide-react";
 import { post } from "@/lib/api";
 import { realtime } from "@/lib/realtime";
+import { endGuestSession } from "@/lib/guest/session";
 import { useUiStore } from "@/lib/stores/ui-store";
 import { useApp } from "./workspace-context";
 import { UserAvatar } from "@/components/ui/avatar";
@@ -21,6 +22,7 @@ export function UserMenu() {
   const logout = async () => {
     await post("/auth/logout").catch(() => {});
     realtime.disable();
+    endGuestSession();
     qc.clear();
     router.replace("/login");
     router.refresh();
